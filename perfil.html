@@ -44,6 +44,7 @@
     .btn:hover{ transform:translateY(-2px); box-shadow:0 0 15px rgba(255,62,138,.5),0 0 20px rgba(122,92,255,.4); filter:brightness(1.15); }
     .btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
     .btn.ghost:hover{box-shadow:0 0 12px rgba(255,255,255,.15)}
+    .btn.small{padding:8px 10px;font-size:.9rem;border-radius:10px}
 
     /* Cabecera perfil */
     .profile-header{display:flex;gap:20px;align-items:center;padding:20px}
@@ -65,10 +66,19 @@
     .title{margin:8px 0 0;font-weight:700}
     .meta{color:var(--muted);font-size:.9rem}
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text);padding:10px 12px}
-    .input::placeholder{color:#9aa}
+    .input, .select, .textarea{
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text);
+      padding:10px 12px;width:100%;font-family:inherit
+    }
+    .textarea{min-height:90px; resize: vertical;}
+    .input::placeholder,.textarea::placeholder{color:#9aa}
     .uploader{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .divider{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:800px){ .two-col{grid-template-columns:1fr} }
+    .status{font-size:.9rem}
+    .status.ok{color: var(--ok)}
+    .status.err{color: var(--err)}
   </style>
 </head>
 <body>
@@ -88,14 +98,45 @@
       <img id="avatar" class="avatar" src="https://via.placeholder.com/150" alt="Avatar">
       <div style="flex:1">
         <h1 id="username" class="username">Cargando…</h1>
-        <div id="bio" class="bio hint">—</div>
+        <div id="bioText" class="bio hint">—</div>
         <div class="actions">
           <label class="btn">
             Cambiar foto
             <input id="avatarInput" type="file" accept="image/*" style="display:none">
           </label>
-          <button id="saveNameBtn" class="btn ghost">Guardar nombre</button>
-          <input id="nameInput" class="input" type="text" placeholder="Nuevo nombre" />
+          <button id="saveAllBtn" class="btn ghost">Guardar perfil</button>
+          <span id="saveStatus" class="status"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Editor de Perfil -->
+    <section class="section">
+      <h2>Editar Perfil</h2>
+      <div class="panel card">
+        <div class="two-col">
+          <div>
+            <label>Nombre de usuario</label>
+            <input id="nameInput" class="input" type="text" placeholder="Tu nombre o nickname" />
+          </div>
+          <div>
+            <label>País</label>
+            <input id="countryInput" class="input" type="text" placeholder="Ej: Chile" />
+          </div>
+        </div>
+        <div style="margin-top:12px" class="two-col">
+          <div>
+            <label>Preferencia de juego</label>
+            <select id="playPrefInput" class="select">
+              <option value="ambos">Ambos</option>
+              <option value="competitivo">Competitivo</option>
+              <option value="casual">Casual</option>
+            </select>
+          </div>
+          <div>
+            <label>Descripción / Bio</label>
+            <textarea id="bioInput" class="textarea" placeholder="Cuéntanos de ti…"></textarea>
+          </div>
         </div>
       </div>
     </section>
@@ -117,9 +158,9 @@
             Subir foto al feed
             <input id="clipInput" type="file" accept="image/*" style="display:none">
           </label>
-            <input id="clipTitle" class="input" type="text" placeholder="Título (opcional)"/>
-            <button id="uploadClipBtn" class="btn ghost">Publicar</button>
-            <div id="feedStatus" class="hint"></div>
+          <input id="clipTitle" class="input" type="text" placeholder="Título (opcional)"/>
+          <button id="uploadClipBtn" class="btn ghost">Publicar</button>
+          <div id="feedStatus" class="hint"></div>
         </div>
         <div class="divider"></div>
         <div id="userFeed" class="grid"></div>
@@ -161,6 +202,7 @@
     const fileExt = (name)=> (name?.split('.').pop() || 'jpg').toLowerCase();
     const slug = (s)=> (s||'').toString().trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-_.]/g,'');
     const fmtDate = (s)=> new Date(s).toLocaleDateString();
+    const setStatus = (msg, ok=true)=>{ const n=el('saveStatus'); n.textContent=msg; n.className = 'status ' + (ok?'ok':'err'); setTimeout(()=>{n.textContent='';}, 2000); };
 
     async function requireSession(){
       const { data, error } = await supabase.auth.getSession();
@@ -171,7 +213,7 @@
       return user;
     }
 
-    // Crea/asegura la fila en profiles
+    // Asegura fila en profiles
     async function ensureProfile(user){
       const { data, error } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
       if(error){ console.error(error); }
@@ -185,28 +227,45 @@
       }
     }
 
-    // === PERFIL ===
+    // === PERFIL: cargar datos ===
     async function loadProfile(){
       const user = await requireSession(); if(!user) return;
       await ensureProfile(user);
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id, username, email, avatar_url, bio, country')
+        .select('id, username, email, avatar_url, bio, country, play_pref')
         .eq('id', user.id).single();
+      if(error){ console.error(error); return; }
 
+      // Mostrar
       el('username').textContent = profile?.username || user.email;
-      el('nameInput').value = profile?.username || '';
-      el('bio').textContent = profile?.bio || '—';
+      el('bioText').textContent = profile?.bio || '—';
       el('avatar').src = profile?.avatar_url || 'https://via.placeholder.com/300x300.png?text=Avatar';
 
-      // Guardar nombre
-      el('saveNameBtn').onclick = async ()=>{
-        const newName = el('nameInput').value?.trim();
-        if(!newName) return;
-        const { error: uerr } = await supabase.from('profiles').update({ username: newName }).eq('id', user.id);
-        if(!uerr) el('username').textContent = newName;
+      // Editor
+      el('nameInput').value = profile?.username || '';
+      el('countryInput').value = profile?.country || '';
+      el('bioInput').value = profile?.bio || '';
+      el('playPrefInput').value = profile?.play_pref || 'ambos';
+    }
+
+    // === PERFIL: guardar cambios (username, bio, country, play_pref) ===
+    async function saveProfile(){
+      if(!currentUser) return;
+      const payload = {
+        username: el('nameInput').value?.trim() || null,
+        bio: el('bioInput').value?.trim() || null,
+        country: el('countryInput').value?.trim() || null,
+        play_pref: el('playPrefInput').value || 'ambos'
       };
+      const { error } = await supabase.from('profiles').update(payload).eq('id', currentUser.id);
+      if(error){ console.error(error); setStatus('No se pudo guardar', false); return; }
+
+      // Refrescar cabecera
+      el('username').textContent = payload.username || currentUser.email;
+      el('bioText').textContent = payload.bio || '—';
+      setStatus('Perfil guardado ✔', true);
     }
 
     // === SUBIR AVATAR → Storage: avatars + guardar en profiles.avatar_url ===
@@ -222,6 +281,7 @@
       const { error: updErr } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
       if(updErr){ alert('Error guardando avatar en perfil'); return; }
       el('avatar').src = url;
+      setStatus('Avatar actualizado ✔', true);
     }
 
     // === RANGOS (user_games + games) ===
@@ -349,14 +409,14 @@
                 <div class="title">Chat con ${p.username || 'Jugador'}</div>
                 <div class="meta">ID Chat: ${c.id} • Match #${c.match_id}</div>
               </div>
-              <button class="btn" style="margin-left:auto" onclick="window.location.href='main.html#messages'">Abrir</button>
+              <button class="btn small" style="margin-left:auto" onclick="window.location.href='main.html#messages'">Abrir</button>
             </div>
           </article>`;
       }).join('');
     }
 
     // === EVENTOS UI ===
-    // FIX: logs y validación al seleccionar archivo para avatar
+    // Avatar
     el('avatarInput').addEventListener('change', (e)=>{
       const file = e.target.files?.[0];
       if(!file){ console.warn('⚠ No se seleccionó ningún archivo para avatar'); return; }
@@ -364,7 +424,10 @@
       uploadAvatar(file);
     });
 
-    // FIX: validación al publicar un clip
+    // Guardar perfil (username, bio, país, play_pref)
+    el('saveAllBtn').addEventListener('click', saveProfile);
+
+    // Publicar clip al feed
     el('uploadClipBtn').addEventListener('click', ()=>{
       const file = el('clipInput').files?.[0];
       const title = el('clipTitle').value;
