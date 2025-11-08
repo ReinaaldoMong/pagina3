@@ -41,7 +41,9 @@
     .logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad)}
     .auth-slot{display:flex;justify-content:end}
     .tab{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
-      color:var(--text);padding:8px 12px;border-radius:10px;font-size:.92rem;cursor:pointer}
+      color:var(--text);padding:8px 12px;border-radius:10px;font-size:.92rem;cursor:pointer;
+      transition:all .25s ease; box-shadow:0 2px 8px rgba(0,0,0,.25)}
+    .tab:hover{transform:translateY(-1px); box-shadow:0 0 12px rgba(255,62,138,.35),0 0 16px rgba(122,92,255,.25)}
     .tab.primary{background:var(--grad);border:none;box-shadow:var(--shadow)}
     .hidden{display:none !important}
     .drawer{position:fixed;inset:0;display:none;}
@@ -53,8 +55,10 @@
     .menu-title{font-weight:700;margin:6px 0 12px}
     .menu-item{width:100%;text-align:left;border:none;background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.10);color:var(--text);
-      padding:12px;border-radius:12px;margin:6px 0;cursor:pointer}
-    .menu-item:hover{transform:translateX(2px);background:rgba(255,255,255,.06)}
+      padding:12px;border-radius:12px;margin:6px 0;cursor:pointer;
+      transition:all .25s ease; box-shadow:0 2px 8px rgba(0,0,0,.2)}
+    .menu-item:hover{transform:translateX(2px);background:rgba(255,255,255,.06);
+      box-shadow:0 0 12px rgba(255,62,138,.28),0 0 16px rgba(122,92,255,.22)}
     .container{max-width:1100px;margin:28px auto;padding:0 16px}
     .panel{
       background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--panel);
@@ -68,22 +72,6 @@
     .card-body{padding:12px 14px 16px}
     .title{margin:0 0 4px;font-size:1.05rem;font-weight:700}
     .meta{color:var(--muted);font-size:.92rem}
-    .tags{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
-    .chip{font-size:.8rem;padding:6px 10px;border-radius:999px;
-      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
-    .messages-wrap{display:grid;grid-template-columns:300px 1fr;gap:14px}
-    .conv-list{height:70vh;overflow:auto;padding:10px}
-    .conv-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer}
-    .conv-item:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
-    .avatar{width:42px;height:42px;border-radius:12px;background:var(--grad)}
-    .thread{display:flex;flex-direction:column;height:70vh}
-    .bubble-wrap{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
-    .bubble{display:inline-block;padding:10px 12px;border-radius:12px;
-      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);max-width:70%}
-    .bubble.me{align-self:flex-end;background:var(--grad);color:#fff}
-    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.08)}
-    .composer input{flex:1}
   </style>
 </head>
 <body>
@@ -116,27 +104,11 @@
       </div>
     </section>
 
-    <!-- PROFILE -->
-    <section id="view-profile" class="view hidden">
-      <div class="panel" style="padding:18px">
-        <h2>Mi perfil</h2>
-        <div id="profileBox" class="hint">Cargando perfil...</div>
-      </div>
-    </section>
-
     <!-- MESSAGES -->
     <section id="view-messages" class="view hidden">
-      <div class="messages-wrap">
-        <aside class="panel conv-list" id="convList"></aside>
-        <section class="panel thread">
-          <div class="bubble-wrap" id="bubbleWrap">
-            <div class="hint">Selecciona una conversación.</div>
-          </div>
-          <div class="composer">
-            <input id="msgInput" class="input" type="text" placeholder="Escribe un mensaje…" />
-            <button class="tab primary" id="btnSend">Enviar</button>
-          </div>
-        </section>
+      <div class="panel" style="padding:18px">
+        <h2>Mensajes</h2>
+        <p class="hint">Pronto disponible…</p>
       </div>
     </section>
   </main>
@@ -147,7 +119,7 @@
 
     const $=(s)=>document.querySelector(s);
     const $$=(s)=>[...document.querySelectorAll(s)];
-    const views=["feed","profile","messages"];
+    const views=["feed","messages"];
     let currentUser=null;
 
     async function initAuth(){
@@ -171,9 +143,15 @@
     $("#btnBurger").addEventListener("click",()=>drawer.classList.add("open"));
     $("#backdrop").addEventListener("click",closeDrawer);
     function closeDrawer(){drawer.classList.remove("open");}
+
+    // Menú: Perfil → redirige a página independiente
     $$(".drawer .menu-item").forEach(b=>{
       const r=b.getAttribute("data-route");
-      if(r){b.addEventListener("click",()=>show(r));}
+      if(r==="profile"){
+        b.addEventListener("click",()=>{ window.location.href="perfil.html"; });
+      }else if(r){
+        b.addEventListener("click",()=>show(r));
+      }
     });
 
     // Logout
@@ -184,7 +162,7 @@
       window.location.href="auth.html";
     }
 
-    // Feed dummy content
+    // Feed dummy
     const FEED=[
       {title:"Duo para VALORANT",game:"VALORANT",rank:"Platino III"},
       {title:"Raid noche — Destiny 2",game:"Destiny 2",rank:"Light 1990+"},
