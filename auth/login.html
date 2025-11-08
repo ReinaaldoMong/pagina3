@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GamerApp — Iniciar sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b10;--panel:#14141c;--panel-2:#1b1b26;--text:#f2f2f7;--muted:#a5a6ae;
+      --brand-1:#7a5cff;--brand-2:#ff3e8a;--ok:#2ecc71;--err:#ff5c5c;--radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35);
+      --grad:linear-gradient(135deg,var(--brand-2),var(--brand-1));
+    }
+    body{
+      font-family:"Poppins";background:var(--bg);color:var(--text);
+      display:flex;justify-content:center;align-items:center;height:100vh;margin:0;
+      background:
+        radial-gradient(900px 600px at 90% -10%,rgba(122,92,255,.25),transparent 55%),
+        radial-gradient(800px 500px at -10% 110%,rgba(255,62,138,.22),transparent 45%),
+        var(--bg);
+    }
+    .panel{background:var(--panel);padding:32px;border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:380px}
+    .input{background:var(--panel-2);color:var(--text);border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;padding:12px;outline:none;font-size:1rem;width:100%}
+    .form-row{display:grid;gap:8px;margin:10px 0}
+    .btn{border:none;cursor:pointer;font-weight:600;border-radius:12px;padding:12px 18px;width:100%;transition:.2s}
+    .btn.primary{background:var(--grad);color:#fff;box-shadow:var(--shadow)}
+    .hint{color:var(--muted);font-size:.9rem;text-align:center;margin-top:12px}
+    .link{color:#b6b7ff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <form id="formLogin" class="panel">
+    <h2 style="text-align:center;margin-top:0">Ingresar</h2>
+    <div class="form-row">
+      <label for="email">Correo</label>
+      <input id="email" class="input" type="email" placeholder="tu@correo.cl" required>
+    </div>
+    <div class="form-row">
+      <label for="pass">Contraseña</label>
+      <input id="pass" class="input" type="password" placeholder="******" minlength="6" required>
+    </div>
+    <div class="form-row">
+      <button class="btn primary" type="submit">Entrar</button>
+    </div>
+    <div id="loginMsg" class="hint"></div>
+    <div class="hint">¿No tienes cuenta? <a href="register.html" class="link">Crear cuenta</a></div>
+    <div class="hint"><a href="forgot.html" class="link">Olvidé mi contraseña</a></div>
+  </form>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    const supabase = createClient('https://jennxlgbaqlneuxunhqw.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Implbm54bGdiYXFsbmV1eHVuaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjQ4ODMsImV4cCI6MjA3Nzk0MDg4M30.2iMvCkcJR4lrkwee9tK8wpyQYZs2Otx0VQNKd1sqXgk')
+
+    const form = document.getElementById('formLogin')
+    const msg = document.getElementById('loginMsg')
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault()
+      msg.textContent = 'Iniciando sesión...'
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email.value.trim(),
+        password: form.pass.value
+      })
+      if (error) {
+        msg.textContent = error.message
+        msg.style.color = 'var(--err)'
+        return
+      }
+      msg.textContent = '¡Bienvenido!'
+      msg.style.color = 'var(--ok)'
+      setTimeout(()=>window.location.href='../main.html',700)
+    })
+  </script>
+</body>
+</html>

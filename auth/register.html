@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GamerApp — Crear cuenta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:"Poppins";background:#0b0b10;color:#f2f2f7;
+      display:flex;justify-content:center;align-items:center;height:100vh;margin:0;
+      background:
+        radial-gradient(900px 600px at 90% -10%,rgba(122,92,255,.25),transparent 55%),
+        radial-gradient(800px 500px at -10% 110%,rgba(255,62,138,.22),transparent 45%),
+        #0b0b10;}
+    .panel{background:#14141c;padding:32px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);width:100%;max-width:380px}
+    .input{background:#1b1b26;color:#f2f2f7;border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;padding:12px;outline:none;font-size:1rem;width:100%}
+    .form-row{display:grid;gap:8px;margin:10px 0}
+    .btn{border:none;cursor:pointer;font-weight:600;border-radius:12px;padding:12px 18px;width:100%;transition:.2s}
+    .btn.primary{background:linear-gradient(135deg,#ff3e8a,#7a5cff);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .hint{color:#a5a6ae;font-size:.9rem;text-align:center;margin-top:12px}
+    .link{color:#b6b7ff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <form id="formRegister" class="panel">
+    <h2 style="text-align:center;margin-top:0">Crear cuenta</h2>
+    <div class="form-row">
+      <label for="regEmail">Correo</label>
+      <input id="regEmail" class="input" type="email" placeholder="tu@correo.cl" required>
+    </div>
+    <div class="form-row">
+      <label for="regNick">Nombre de jugador</label>
+      <input id="regNick" class="input" type="text" placeholder="TuNick" minlength="2" required>
+    </div>
+    <div class="form-row">
+      <label for="regPass">Contraseña</label>
+      <input id="regPass" class="input" type="password" placeholder="mínimo 6 caracteres" minlength="6" required>
+    </div>
+    <div class="form-row">
+      <button class="btn primary" type="submit">Crear cuenta</button>
+    </div>
+    <div id="regMsg" class="hint"></div>
+    <div class="hint">¿Ya tienes cuenta? <a href="login.html" class="link">Ingresar</a></div>
+  </form>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    const supabase = createClient('https://jennxlgbaqlneuxunhqw.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Implbm54bGdiYXFsbmV1eHVuaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjQ4ODMsImV4cCI6MjA3Nzk0MDg4M30.2iMvCkcJR4lrkwee9tK8wpyQYZs2Otx0VQNKd1sqXgk')
+
+    const form = document.getElementById('formRegister')
+    const msg = document.getElementById('regMsg')
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault()
+      msg.textContent = 'Creando cuenta...'
+      const { error } = await supabase.auth.signUp({
+        email: form.regEmail.value.trim(),
+        password: form.regPass.value
+      })
+      if (error) {
+        msg.textContent = error.message
+        msg.style.color = 'var(--err)'
+        return
+      }
+      msg.textContent = 'Cuenta creada. Inicia sesión ahora.'
+      msg.style.color = 'var(--ok)'
+      setTimeout(()=>window.location.href='login.html',700)
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GamerApp — Inicio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b10;--panel:#14141c;--panel-2:#1b1b26;--text:#f2f2f7;--muted:#a5a6ae;
+      --brand-1:#7a5cff;--brand-2:#ff3e8a;--ok:#2ecc71;--warn:#ffb020;--err:#ff5c5c;
+      --radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35);
+      --grad:linear-gradient(135deg,var(--brand-2),var(--brand-1));
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:"Poppins",system-ui;display:flex;justify-content:center;align-items:center;
+      background:
+        radial-gradient(900px 600px at 90% -10%,rgba(122,92,255,.25),transparent 55%),
+        radial-gradient(800px 500px at -10% 110%,rgba(255,62,138,.22),transparent 45%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .container{
+      text-align:center;
+      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--panel);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:48px;
+      max-width:500px;
+      width:90%;
+      animation:fadeIn .8s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity:0;transform:translateY(20px);}
+      to {opacity:1;transform:translateY(0);}
+    }
+
+    img.logo{
+      width:80%;
+      max-width:320px;
+      margin-bottom:24px;
+    }
+
+    h1{
+      font-size:1.8rem;
+      margin-bottom:8px;
+    }
+
+    p.hint{
+      color:var(--muted);
+      font-size:.95rem;
+      margin-bottom:32px;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      border-radius:12px;
+      padding:12px 18px;
+      transition:.2s;
+      width:100%;
+      max-width:250px;
+      font-size:1rem;
+      margin:6px 0;
+    }
+    .btn.primary{background:var(--grad);color:#fff;box-shadow:var(--shadow);}
+    .btn.secondary{background:var(--panel-2);color:#fff;border:1px solid rgba(255,255,255,.12);}
+    .btn:hover{opacity:.9;}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <img src="MATCHGG_mainlogo.png" alt="Logo GamerApp" class="logo">
+    <h1>Saludos Gamer</h1>
+    <p class="hint">Conecta con jugadores, crea partidas y comparte tu estilo de juego.</p>
+    <div>
+      <button class="btn primary" onclick="window.location.href='auth/login.html'">Ingresar</button>
+      <button class="btn secondary" onclick="window.location.href='auth/register.html'">Crear cuenta</button>
+    </div>
+  </main>
+</body>
+</html>

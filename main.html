@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GamerApp — Menú Principal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b10; --panel:#14141c; --panel-2:#1b1b26; --text:#f2f2f7; --muted:#a5a6ae;
+      --brand-1:#7a5cff; --brand-2:#ff3e8a; --ok:#2ecc71; --warn:#ffb020; --err:#ff5c5c;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --grad:linear-gradient(135deg,var(--brand-2),var(--brand-1));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:
+        radial-gradient(900px 600px at 90% -10%,rgba(122,92,255,.25),transparent 55%),
+        radial-gradient(800px 500px at -10% 110%,rgba(255,62,138,.22),transparent 45%),
+        var(--bg);
+      color:var(--text);
+    }
+    .topbar{
+      position:sticky;top:0;z-index:10;display:grid;
+      grid-template-columns:56px 1fr 56px;align-items:center;
+      padding:10px 12px;background:rgba(10,10,14,.7);backdrop-filter:blur(8px);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .burger{
+      width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);cursor:pointer;display:grid;place-items:center;
+    }
+    .burger span{display:block;width:20px;height:2px;background:#fff;position:relative}
+    .burger span::before,.burger span::after{
+      content:"";position:absolute;width:20px;height:2px;background:#fff;left:0
+    }
+    .burger span::before{top:-6px}.burger span::after{top:6px}
+    .logo-center{display:flex;align-items:center;justify-content:center;gap:10px}
+    .logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad)}
+    .auth-slot{display:flex;justify-content:end}
+    .tab{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
+      color:var(--text);padding:8px 12px;border-radius:10px;font-size:.92rem;cursor:pointer}
+    .tab.primary{background:var(--grad);border:none;box-shadow:var(--shadow)}
+    .hidden{display:none !important}
+    .drawer{position:fixed;inset:0;display:none;}
+    .drawer.open{display:block}
+    .drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);}
+    .drawer .panel{position:absolute;top:0;left:0;height:100%;width:280px;
+      background:var(--panel);border-right:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);padding:14px;}
+    .menu-title{font-weight:700;margin:6px 0 12px}
+    .menu-item{width:100%;text-align:left;border:none;background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.10);color:var(--text);
+      padding:12px;border-radius:12px;margin:6px 0;cursor:pointer}
+    .menu-item:hover{transform:translateX(2px);background:rgba(255,255,255,.06)}
+    .container{max-width:1100px;margin:28px auto;padding:0 16px}
+    .panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--panel);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .hint{color:var(--muted);font-size:.9rem}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+    .card{display:flex;flex-direction:column;overflow:hidden}
+    .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0a0a0a}
+    .card-body{padding:12px 14px 16px}
+    .title{margin:0 0 4px;font-size:1.05rem;font-weight:700}
+    .meta{color:var(--muted);font-size:.92rem}
+    .tags{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+    .chip{font-size:.8rem;padding:6px 10px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+    .messages-wrap{display:grid;grid-template-columns:300px 1fr;gap:14px}
+    .conv-list{height:70vh;overflow:auto;padding:10px}
+    .conv-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer}
+    .conv-item:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
+    .avatar{width:42px;height:42px;border-radius:12px;background:var(--grad)}
+    .thread{display:flex;flex-direction:column;height:70vh}
+    .bubble-wrap{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .bubble{display:inline-block;padding:10px 12px;border-radius:12px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);max-width:70%}
+    .bubble.me{align-self:flex-end;background:var(--grad);color:#fff}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+    .composer input{flex:1}
+  </style>
+</head>
+<body>
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="burger" id="btnBurger"><span></span></button>
+    <div class="logo-center"><div class="logo-mark"></div><div class="logo-text">GamerApp</div></div>
+    <div class="auth-slot"><button class="tab primary" id="btnLogoutTop">Salir</button></div>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer" id="drawer">
+    <div class="backdrop" id="backdrop"></div>
+    <div class="panel">
+      <div class="menu-title">Menú</div>
+      <button class="menu-item" data-route="feed">Feed</button>
+      <button class="menu-item" data-route="profile">Perfil</button>
+      <button class="menu-item" data-route="messages">Mensajes</button>
+      <div class="menu-title">Cuenta</div>
+      <button class="menu-item" id="menuLogout">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- FEED -->
+    <section id="view-feed" class="view">
+      <div class="panel" style="padding:14px">
+        <h2>Feed de jugadores</h2>
+        <div id="grid" class="grid"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="view-profile" class="view hidden">
+      <div class="panel" style="padding:18px">
+        <h2>Mi perfil</h2>
+        <div id="profileBox" class="hint">Cargando perfil...</div>
+      </div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section id="view-messages" class="view hidden">
+      <div class="messages-wrap">
+        <aside class="panel conv-list" id="convList"></aside>
+        <section class="panel thread">
+          <div class="bubble-wrap" id="bubbleWrap">
+            <div class="hint">Selecciona una conversación.</div>
+          </div>
+          <div class="composer">
+            <input id="msgInput" class="input" type="text" placeholder="Escribe un mensaje…" />
+            <button class="tab primary" id="btnSend">Enviar</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    const supabase = createClient('https://jennxlgbaqlneuxunhqw.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Implbm54bGdiYXFsbmV1eHVuaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjQ4ODMsImV4cCI6MjA3Nzk0MDg4M30.2iMvCkcJR4lrkwee9tK8wpyQYZs2Otx0VQNKd1sqXgk')
+
+    const $=(s)=>document.querySelector(s);
+    const $$=(s)=>[...document.querySelectorAll(s)];
+    const views=["feed","profile","messages"];
+    let currentUser=null;
+
+    async function initAuth(){
+      const { data } = await supabase.auth.getSession();
+      currentUser = data.session?.user ?? null;
+      if(!currentUser){
+        window.location.href="auth.html";
+      } else {
+        show("feed");
+      }
+    }
+
+    function show(route){
+      views.forEach(v=>$("#view-"+v)?.classList.add("hidden"));
+      $("#view-"+route)?.classList.remove("hidden");
+      closeDrawer();
+    }
+
+    // Drawer
+    const drawer=$("#drawer");
+    $("#btnBurger").addEventListener("click",()=>drawer.classList.add("open"));
+    $("#backdrop").addEventListener("click",closeDrawer);
+    function closeDrawer(){drawer.classList.remove("open");}
+    $$(".drawer .menu-item").forEach(b=>{
+      const r=b.getAttribute("data-route");
+      if(r){b.addEventListener("click",()=>show(r));}
+    });
+
+    // Logout
+    $("#btnLogoutTop").addEventListener("click",logout);
+    $("#menuLogout").addEventListener("click",logout);
+    async function logout(){
+      await supabase.auth.signOut();
+      window.location.href="auth.html";
+    }
+
+    // Feed dummy content
+    const FEED=[
+      {title:"Duo para VALORANT",game:"VALORANT",rank:"Platino III"},
+      {title:"Raid noche — Destiny 2",game:"Destiny 2",rank:"Light 1990+"},
+      {title:"Co-op Elden Ring",game:"Elden Ring",rank:"—"},
+    ];
+    function renderFeed(){
+      $("#grid").innerHTML=FEED.map(i=>`
+        <article class="card panel">
+          <img class="thumb" src="https://picsum.photos/400/200?random=${Math.random()}" alt="">
+          <div class="card-body">
+            <h3 class="title">${i.title}</h3>
+            <div class="meta">${i.game} • ${i.rank}</div>
+          </div>
+        </article>`).join("");
+    }
+
+    renderFeed();
+    initAuth();
+  </script>
+</body>
+</html>
