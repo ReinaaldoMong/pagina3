@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Perfil - GamerApp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b10; --panel:#14141c; --panel-2:#1b1b26; --text:#f2f2f7; --muted:#a5a6ae;
+      --brand-1:#7a5cff; --brand-2:#ff3e8a; --ok:#2ecc71; --warn:#ffb020; --err:#ff5c5c;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --grad:linear-gradient(135deg,var(--brand-2),var(--brand-1));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:
+        radial-gradient(900px 600px at 90% -10%,rgba(122,92,255,.25),transparent 55%),
+        radial-gradient(800px 500px at -10% 110%,rgba(255,62,138,.22),transparent 45%),
+        var(--bg);
+      color:var(--text); font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+    }
+    .topbar{
+      position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px;background:rgba(10,10,14,.8);backdrop-filter:blur(8px);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-mark{width:32px;height:32px;border-radius:10px;background:var(--grad)}
+    .container{max-width:1100px;margin:22px auto;padding:0 16px}
+    .panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--panel);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .hint{color:var(--muted);font-size:.92rem}
+
+    /* Botones con hover iluminado */
+    .btn{
+      padding:10px 14px;background:var(--grad);border:none;border-radius:12px;color:#fff;
+      cursor:pointer;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:all .25s ease;
+    }
+    .btn:hover{ transform:translateY(-2px); box-shadow:0 0 15px rgba(255,62,138,.5),0 0 20px rgba(122,92,255,.4); filter:brightness(1.15); }
+    .btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+    .btn.ghost:hover{box-shadow:0 0 12px rgba(255,255,255,.15)}
+
+    /* Cabecera perfil */
+    .profile-header{display:flex;gap:20px;align-items:center;padding:20px}
+    .avatar{
+      width:120px;height:120px;border-radius:50%;object-fit:cover;background:#333;border:3px solid var(--brand-1);
+    }
+    .username{margin:0;font-size:1.8rem;font-weight:800}
+    .bio{margin:6px 0 10px;color:var(--muted)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    /* Secciones */
+    .section{margin-top:22px}
+    .section h2{margin:0 0 12px}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+    .card{padding:14px}
+    .game-rank{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+    .badge{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10)}
+    .thumb{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;background:#0a0a0a}
+    .title{margin:8px 0 0;font-weight:700}
+    .meta{color:var(--muted);font-size:.9rem}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text);padding:10px 12px}
+    .input::placeholder{color:#9aa}
+    .uploader{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .divider{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div>GamerApp</div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" onclick="window.location.href='main.html'">Volver</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Header Perfil -->
+    <section class="panel profile-header">
+      <img id="avatar" class="avatar" src="https://via.placeholder.com/150" alt="Avatar">
+      <div style="flex:1">
+        <h1 id="username" class="username">Cargando…</h1>
+        <div id="bio" class="bio hint">—</div>
+        <div class="actions">
+          <label class="btn">
+            Cambiar foto
+            <input id="avatarInput" type="file" accept="image/*" style="display:none">
+          </label>
+          <button id="saveNameBtn" class="btn ghost">Guardar nombre</button>
+          <input id="nameInput" class="input" type="text" placeholder="Nuevo nombre" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Rangos -->
+    <section class="section">
+      <h2>Rangos en juegos</h2>
+      <div id="ranks" class="grid">
+        <div class="hint">Cargando rangos…</div>
+      </div>
+    </section>
+
+    <!-- Feed -->
+    <section class="section">
+      <h2>Tu Feed</h2>
+      <div class="panel" style="padding:14px">
+        <div class="uploader">
+          <label class="btn">
+            Subir foto al feed
+            <input id="clipInput" type="file" accept="image/*" style="display:none">
+          </label>
+            <input id="clipTitle" class="input" type="text" placeholder="Título (opcional)"/>
+            <button id="uploadClipBtn" class="btn ghost">Publicar</button>
+            <div id="feedStatus" class="hint"></div>
+        </div>
+        <div class="divider"></div>
+        <div id="userFeed" class="grid"></div>
+      </div>
+    </section>
+
+    <!-- Galería -->
+    <section class="section">
+      <h2>Fotos</h2>
+      <div id="gallery" class="grid"></div>
+    </section>
+
+    <!-- Matches -->
+    <section class="section">
+      <h2>Tus Matches</h2>
+      <div id="matches" class="grid"></div>
+    </section>
+
+    <!-- Grupos -->
+    <section class="section">
+      <h2>Tus Grupos</h2>
+      <div id="groups" class="grid"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // === CONFIG SUPABASE ===
+    const supabase = createClient(
+      'https://jennxlgbaqlneuxunhqw.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Implbm54bGdiYXFsbmV1eHVuaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNjQ4ODMsImV4cCI6MjA3Nzk0MDg4M30.2iMvCkcJR4lrkwee9tK8wpyQYZs2Otx0VQNKd1sqXgk'
+    );
+
+    const el = (id) => document.getElementById(id);
+    let currentUser = null;
+
+    // === HELPERS ===
+    const fileExt = (name)=> (name?.split('.').pop() || 'jpg').toLowerCase();
+    const slug = (s)=> (s||'').toString().trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-_.]/g,'');
+    const fmtDate = (s)=> new Date(s).toLocaleDateString();
+
+    async function requireSession(){
+      const { data, error } = await supabase.auth.getSession();
+      if(error) throw error;
+      const user = data.session?.user;
+      if(!user){ window.location.href = "auth.html"; return null; }
+      currentUser = user;
+      return user;
+    }
+
+    // Crea/asegura la fila en profiles
+    async function ensureProfile(user){
+      const { data, error } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
+      if(error){ console.error(error); }
+      if(!data){
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'player',
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    // === PERFIL ===
+    async function loadProfile(){
+      const user = await requireSession(); if(!user) return;
+      await ensureProfile(user);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, username, email, avatar_url, bio, country')
+        .eq('id', user.id).single();
+
+      el('username').textContent = profile?.username || user.email;
+      el('nameInput').value = profile?.username || '';
+      el('bio').textContent = profile?.bio || '—';
+      el('avatar').src = profile?.avatar_url || 'https://via.placeholder.com/300x300.png?text=Avatar';
+
+      // Guardar nombre
+      el('saveNameBtn').onclick = async ()=>{
+        const newName = el('nameInput').value?.trim();
+        if(!newName) return;
+        const { error: uerr } = await supabase.from('profiles').update({ username: newName }).eq('id', user.id);
+        if(!uerr) el('username').textContent = newName;
+      };
+    }
+
+    // === SUBIR AVATAR → Storage: avatars + guardar en profiles.avatar_url ===
+    async function uploadAvatar(file){
+      if(!file || !currentUser) { console.warn('No file/currentUser for avatar upload'); return; }
+      const ext = fileExt(file.name);
+      const path = `${currentUser.id}/${Date.now()}-avatar.${ext}`;
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert:true, cacheControl:'3600' });
+      if(upErr){ alert('Error subiendo avatar'); console.error(upErr); return; }
+      const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path);
+      const url = pub?.publicUrl;
+      if(!url){ alert('No se pudo obtener URL pública'); return; }
+      const { error: updErr } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+      if(updErr){ alert('Error guardando avatar en perfil'); return; }
+      el('avatar').src = url;
+    }
+
+    // === RANGOS (user_games + games) ===
+    async function loadRanks(){
+      const { data, error } = await supabase
+        .from('user_games')
+        .select('rank, hours_played, games:game_id(name,platform)')
+        .eq('user_id', currentUser.id);
+      const wrap = el('ranks');
+      if(error){ wrap.innerHTML = '<div class="hint">No se pudieron cargar los rangos.</div>'; return; }
+      if(!data?.length){ wrap.innerHTML = '<div class="hint">Aún no agregas juegos.</div>'; return; }
+      wrap.innerHTML = data.map(r=>`
+        <div class="card panel game-rank">
+          <div><strong>${r.games?.name || 'Juego'}</strong> <span class="badge">${r.games?.platform || ''}</span></div>
+          <div><span class="badge">${r.rank || '—'}</span></div>
+        </div>
+      `).join('');
+    }
+
+    // === FEED / CLIPS ===
+    async function loadClips(){
+      const { data, error } = await supabase
+        .from('clips')
+        .select('id, url, title, likes, created_at')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending:false });
+
+      const feed = el('userFeed');
+      const gal = el('gallery');
+      if(error){ feed.innerHTML = '<div class="hint">No se pudo cargar tu feed.</div>'; gal.innerHTML=''; return; }
+      if(!data?.length){ feed.innerHTML = '<div class="hint">Aún no publicas nada.</div>'; gal.innerHTML = '<div class="hint">Sin fotos por ahora.</div>'; return; }
+
+      feed.innerHTML = data.map(c=>`
+        <article class="panel card">
+          <img class="thumb" src="${c.url}" alt="">
+          <div class="title">${c.title || 'Publicación'}</div>
+          <div class="meta">Likes: ${c.likes ?? 0} • ${fmtDate(c.created_at)}</div>
+        </article>`).join('');
+
+      gal.innerHTML = data.map(c=>`<img class="thumb" src="${c.url}" alt="">`).join('');
+    }
+
+    // Subir clip → Storage: clips + fila en tabla clips
+    async function uploadClip(file, title){
+      if(!file){ alert('Selecciona una imagen'); console.warn('No file for clip upload'); return; }
+      const ext = fileExt(file.name);
+      const path = `${currentUser.id}/${Date.now()}-${slug(title||'clip')}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('clips').upload(path, file, { upsert:true, cacheControl:'3600' });
+      if(upErr){ alert('Error subiendo imagen'); console.error(upErr); return; }
+      const { data: pub } = supabase.storage.from('clips').getPublicUrl(path);
+      const url = pub?.publicUrl;
+      if(!url){ alert('No se pudo obtener URL pública'); return; }
+      const { error: insErr } = await supabase.from('clips').insert({ user_id: currentUser.id, url, title: title || null, likes: 0 });
+      if(insErr){ alert('No se pudo guardar el post'); console.error(insErr); return; }
+      el('feedStatus').textContent = 'Publicado ✔';
+      await loadClips();
+      setTimeout(()=>el('feedStatus').textContent='',1500);
+    }
+
+    // === MATCHES ===
+    async function loadMatches(){
+      const { data: matches, error } = await supabase
+        .from('matches')
+        .select('id, from_user, to_user, status, created_at')
+        .or(`from_user.eq.${currentUser.id},to_user.eq.${currentUser.id}`)
+        .order('created_at', { ascending:false });
+
+      const wrap = el('matches');
+      if(error){ wrap.innerHTML = '<div class="hint">No se pudo cargar tus matches.</div>'; return; }
+      if(!matches?.length){ wrap.innerHTML = '<div class="hint">Sin matches por ahora.</div>'; return; }
+
+      const otherIds = [...new Set(matches.map(m => m.from_user===currentUser.id ? m.to_user : m.from_user))];
+      const { data: others } = await supabase.from('profiles').select('id, username, avatar_url').in('id', otherIds);
+      const map = new Map((others||[]).map(p=>[p.id,p]));
+
+      wrap.innerHTML = matches.map(m=>{
+        const oid = m.from_user===currentUser.id ? m.to_user : m.from_user;
+        const p = map.get(oid) || {};
+        return `
+          <article class="panel card">
+            <div class="row">
+              <img src="${p.avatar_url || 'https://via.placeholder.com/80'}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:2px solid rgba(255,255,255,.12)"/>
+              <div>
+                <div class="title">${p.username || 'Jugador'}</div>
+                <div class="meta">Estado: ${m.status || '—'} • ${fmtDate(m.created_at)}</div>
+              </div>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    // === GRUPOS (chats ligados a tus matches) ===
+    async function loadGroups(){
+      const { data: matches } = await supabase
+        .from('matches')
+        .select('id, from_user, to_user, status')
+        .or(`from_user.eq.${currentUser.id},to_user.eq.${currentUser.id}`);
+
+      const wrap = el('groups');
+      if(!matches?.length){ wrap.innerHTML = '<div class="hint">Aún no hay grupos asociados.</div>'; return; }
+
+      const matchIds = matches.map(m=>m.id);
+      const { data: chats, error } = await supabase
+        .from('chats')
+        .select('id, match_id, created_at')
+        .in('match_id', matchIds)
+        .order('created_at', { ascending:false });
+
+      if(error){ wrap.innerHTML = '<div class="hint">No se pudieron cargar tus grupos.</div>'; return; }
+      if(!chats?.length){ wrap.innerHTML = '<div class="hint">Sin grupos por ahora.</div>'; return; }
+
+      const otherIds = [...new Set(matches.map(m => m.from_user===currentUser.id ? m.to_user : m.from_user))];
+      const { data: others } = await supabase.from('profiles').select('id, username, avatar_url').in('id', otherIds);
+      const pmap = new Map((others||[]).map(p=>[p.id,p]));
+
+      wrap.innerHTML = chats.map(c=>{
+        const match = matches.find(m=>m.id===c.match_id);
+        const otherId = match ? (match.from_user===currentUser.id ? match.to_user : match.from_user) : null;
+        const p = otherId ? (pmap.get(otherId) || {}) : {};
+        return `
+          <article class="panel card">
+            <div class="row">
+              <img src="${p.avatar_url || 'https://via.placeholder.com/80'}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;border:2px solid rgba(255,255,255,.12)"/>
+              <div>
+                <div class="title">Chat con ${p.username || 'Jugador'}</div>
+                <div class="meta">ID Chat: ${c.id} • Match #${c.match_id}</div>
+              </div>
+              <button class="btn" style="margin-left:auto" onclick="window.location.href='main.html#messages'">Abrir</button>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    // === EVENTOS UI ===
+    // FIX: logs y validación al seleccionar archivo para avatar
+    el('avatarInput').addEventListener('change', (e)=>{
+      const file = e.target.files?.[0];
+      if(!file){ console.warn('⚠ No se seleccionó ningún archivo para avatar'); return; }
+      console.log('📤 Subiendo avatar:', file.name);
+      uploadAvatar(file);
+    });
+
+    // FIX: validación al publicar un clip
+    el('uploadClipBtn').addEventListener('click', ()=>{
+      const file = el('clipInput').files?.[0];
+      const title = el('clipTitle').value;
+      if(!file){ alert('Selecciona una imagen para publicar.'); console.warn('⚠ No se seleccionó archivo para clip'); return; }
+      console.log('📤 Subiendo publicación:', file.name);
+      uploadClip(file, title);
+    });
+
+    // === INIT ===
+    (async function init(){
+      await loadProfile();
+      await loadRanks();
+      await loadClips();
+      await loadMatches();
+      await loadGroups();
+    })();
+  </script>
+</body>
+</html>
